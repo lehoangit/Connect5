@@ -1,0 +1,42 @@
+﻿<Window x:Name="wpfConnect_5" x:Class="Connect_5.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Connect_5"
+        mc:Ignorable="d"
+        Title="MiniGame Connect 5" Height="579" Width="1134.2" Icon="Images/favicon.png" ScrollViewer.HorizontalScrollBarVisibility="Auto" Background="#FFF0EEEE" ResizeMode="NoResize" Cursor="Arrow" WindowStartupLocation="CenterScreen" Loaded="wpfConnect_5_Loaded">
+    <Window.Resources>
+        <SolidColorBrush x:Key="Brush2" Color="#FFFB9B9B"/>
+    </Window.Resources>
+    <DockPanel>
+        <Grid DockPanel.Dock="Top" x:Name="gridMain">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="281*"/>
+                <ColumnDefinition Width="550*"/>
+                <ColumnDefinition Width="297*"/>
+            </Grid.ColumnDefinitions>
+
+            <Image x:Name="image" HorizontalAlignment="Left" Height="144" VerticalAlignment="Top" Width="246" Source="Images/logo.png" Margin="10,0,0,0"/>
+            <Label x:Name="lblCurrentPlayer" HorizontalAlignment="Left" Margin="10,144,0,0" VerticalAlignment="Top" Height="32" Width="148" Cursor="" FontFamily="Arial" FontSize="18.667" FontWeight="Bold" Content="Current Player:"/>
+            <Button x:Name="btnNewGame" Content="New Game" HorizontalAlignment="Left" Margin="10,296,0,0" VerticalAlignment="Top" Width="234" Height="51" BorderBrush="White" FontFamily="Arial Black" FontSize="16" Click="btnNew_Click">
+                <Button.Background>
+                    <ImageBrush ImageSource="Images/btn_7.png"/>
+                </Button.Background>
+            </Button>
+            <Button x:Name="btnExit" Content="Exit" HorizontalAlignment="Left" Margin="10,473,0,0" VerticalAlignment="Top" Width="234" Height="50" FontFamily="Arial Black" FontSize="16" Click="btnExit_Click" BorderBrush="#FF707070">
+                <Button.Background>
+                    <ImageBrush ImageSource="Images/btn_7.png"/>
+                </Button.Background>
+            </Button>
+            <Canvas x:Name="canvasBoard" Grid.Column="1" HorizontalAlignment="Left" Height="530" Margin="10,10,0,0" VerticalAlignment="Top" Width="530"/>
+            <RadioButton x:Name="radTwoHuman" Content="Two human plays" HorizontalAlignment="Left" Margin="44,208,0,0" VerticalAlignment="Top" FontFamily="Times New Roman" FontSize="16"/>
+            <RadioButton x:Name="radHumanComputer" Content="Human vs Computer" HorizontalAlignment="Left" Margin="44,230,0,0" VerticalAlignment="Top" FontFamily="Times New Roman" FontSize="16"/>
+            <RadioButton x:Name="radHumanOnline" Content="Human Online" HorizontalAlignment="Left" Margin="44,252,0,0" VerticalAlignment="Top" FontFamily="Times New Roman" FontSize="16"/>
+            <RadioButton x:Name="radComputerOnline" Content="Computer Online" HorizontalAlignment="Left" Margin="44,274,0,0" VerticalAlignment="Top" FontFamily="Times New Roman" FontSize="16"/>
+            <TextBox x:Name="txtNickname" HorizontalAlignment="Left" Height="22" Margin="44,181,0,0" TextWrapping="Wrap" Text="Bỏ đồ án" VerticalAlignment="Top" Width="202" FontFamily="Times New Roman" FontSize="16"/>
+            <Label x:Name="lblProgress" Content="0 %" Margin="185,149,37,369" SourceUpdated="lblProgress_SourceUpdated"/>
+            <local:Messager x:Name="mgChat" Grid.Column="2" HorizontalAlignment="Left" Margin="10,80,0,0" VerticalAlignment="Top" Height="460" Width="283" RenderTransformOrigin="0.511,0.661"/>
+        </Grid>
+    </DockPanel>
+</Window>
