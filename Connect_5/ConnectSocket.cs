@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using Quobject.SocketIoClientDotNet.Client;
+using System.Threading;
 using System.Windows;
 
 namespace Connect_5
@@ -32,7 +33,6 @@ namespace Connect_5
                 first = data.ToString().Contains("You are the first player!");
                 mg.Server = Message = data.ToString();
                 //mg.Server = Message = ((JObject)data)["message"].ToString();
-
                 if (((JObject)data)["message"].ToString() == "Welcome!")
                 {
                     socket.Emit("MyNameIs", name);
@@ -47,6 +47,20 @@ namespace Connect_5
                 //    mg.NicknameB = ((JObject)data)["from"].ToString();
                 //}
             });
+            socket.On("EndGame", (data) =>
+            {
+                mg.Server = ((JObject)data)["message"].ToString();
+                if (data.ToString().Contains(mg.NicknameA))
+                    cBanCo.end = Player.Human; // you won the game!
+                else
+                    cBanCo.end = Player.Com; // your friend won the game!
+
+                Thread.Sleep(200);
+                //var tmp = ((JObject)data)["highlight"]; // save temple position won the game
+                mg.Server = data.ToString();
+
+                mg.Server = ((JObject)data)["message"].ToString();
+            });
             socket.On(Socket.EVENT_ERROR, (data) =>
             {
                 mg.Server = Message = ((JObject)data)["message"].ToString();
@@ -58,7 +72,7 @@ namespace Connect_5
                 // kiểm tra lượt đánh, nếu == 1 là người kia đánh
                 if ((int)o["player"] == 1)
                     cBanCo.currPlayer = Player.Com;
-                
+
                 // kiểm tra lượt đánh, nếu == 0 là bạn vừa mới đánh
                 if ((int)o["player"] == 0)
                     cBanCo.currPlayer = Player.Human;

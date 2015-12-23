@@ -36,19 +36,22 @@ namespace Connect_5
 
     class cBanCo
     {
-        // tọa độ
+        // position of server sent for client
         public static int rows = -1, columns = -1;
         public static Socket socket;
 
-        private DispatcherTimer timer;
+        // 5 won position of server sent for client
+        public static cCells p1, p2, p3, p4, p5;
 
-        //Các biến chính
+        private DispatcherTimer timer; // timer variable 
+
+        // main variables
         private int row = Settings.Default._rows;
         private int column = Settings.Default._columns; //Số hàng, cột
         private int length = Settings.Default._length;//Độ dài mỗi ô
         public static Player currPlayer; //lượt đi
         public Player[,] board; //mảng lưu vị trí các con cờ
-        private Player end; //biến kiểm tra trò chơi kết thúc
+        public static Player end; //biến kiểm tra trò chơi kết thúc
         private MainWindow frmParent; //Form thực hiện
         private Canvas canvasBanCo; // Nơi vẽ bàn cờ
         private cLuongGiaBanCo eBoard; //Bảng lượng giá bàn cờ
@@ -57,8 +60,8 @@ namespace Connect_5
         public cOption Option; // Tùy chọn trò chơi
                                //Các biến phụ
 
-        private Image coAo1; // cờ ảo cho người chơi thứ 1
-        private Image coAo2; // cờ ảo cho người chơi thứ 2
+        private Image chess1; // cờ ảo cho người chơi thứ 1
+        private Image chess2; // cờ ảo cho người chơi thứ 2
 
         // Điểm lượng giá
         public int[] PhongThu = new int[5] { 0, 1, 9, 85, 769 };
@@ -99,14 +102,6 @@ namespace Connect_5
             canvasBanCo = can;
             board = new Player[row, column];
             eBoard = new cLuongGiaBanCo(this);
-
-
-            coAo1 = new Image();
-            coAo2 = new Image();
-            coAo1.Source = new BitmapImage(new Uri("pack://application:,,,/Images/x.png"));
-            coAo2.Source = new BitmapImage(new Uri("pack://application:,,,/Images/o.png"));
-            CreateCoAo();
-
             canvasBanCo.MouseDown += new MouseButtonEventHandler(canvasBanCo_MouseDown);
 
 
@@ -127,13 +122,41 @@ namespace Connect_5
 
         private void timer_Tick(object sender, EventArgs e)
         {
-            if (rows != -1 && columns != -1)
+            if (end == Player.None)// check in not yet end game
             {
-                veQuanCo(rows, columns); //Vẽ con cờ theo lượt chơi
-                rows = -1; columns = -1;
+                if (rows != -1 && columns != -1)
+                {
+                    board[rows, columns] = currPlayer;//Lưu loại cờ vừa đánh vào mảng
+                    veQuanCo(rows, columns); // Draw chess
+                    currPlayer = Player.None; // destroy current turn
+                    rows = -1; columns = -1; // stop exeption drawing chess 
+                }
             }
+            else if (end == Player.Human) // check in client won the game
+            {
+
+            }
+
         }
 
+        // highlight position when someone won the game
+        private void Highlight()
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                int rw = OWin.GiaTri[i].Row;
+                int cl = OWin.GiaTri[i].Column;
+                Image highlight = new Image();
+                highlight.Source = new BitmapImage(new Uri("pack://application:,,,/Images/tick2.png"));
+                highlight.Width = highlight.Height = length - 10;
+                highlight.HorizontalAlignment = 0;
+                highlight.VerticalAlignment = 0;
+                highlight.Margin = new Thickness(cl * length + 3, rw * length + 3, 0, 0);
+                highlight.Opacity = 100;
+                canvasBanCo.Children.Add(highlight);
+            }
+        }
+        
 
 
         //Player pp = Player.Com;
@@ -182,22 +205,6 @@ namespace Connect_5
 
         ///////////////////////////////////////////////////////////////////////////////////
 
-        public void CreateCoAo()
-        {
-            coAo1.Source = new BitmapImage(new Uri("pack://application:,,,/Images/x.png"));
-            coAo2.Source = new BitmapImage(new Uri("pack://application:,,,/Images/o.png"));
-
-            coAo2.Width = coAo2.Height = length;
-            coAo2.HorizontalAlignment = 0;
-            coAo2.VerticalAlignment = 0;
-            coAo2.Opacity = 0;
-
-            coAo1.Width = coAo1.Height = length;
-            coAo1.HorizontalAlignment = 0;
-            coAo1.VerticalAlignment = 0;
-            coAo1.Opacity = 0;
-        }
-
         public void DiNgauNhien()
         {
             if (currPlayer == Player.Com)
@@ -235,6 +242,7 @@ namespace Connect_5
                         end = CheckEnd(rw, cl);//Kiểm tra xem trận đấu kết thúc chưa
                         if (end == Player.Human)//Nếu người thắng cuộc là người
                         {
+                            Highlight();
                             MessageBox.Show("Thắng máy rồi! Bạn giỏi quá");
                             canvasBanCo.IsEnabled = false;
                         }
@@ -263,6 +271,7 @@ namespace Connect_5
 
                         if (end == Player.Com)//Nếu máy thắng
                         {
+                            Highlight();
                             MessageBox.Show("Đồ quỷ! Gà quá đi mất!");
                             canvasBanCo.IsEnabled = false;
                         }
@@ -317,17 +326,10 @@ namespace Connect_5
                 }
             }
             #endregion
-            //#region Máy đánh online
-            //else if (Option.WhoPlayWith == Player.ComputerOnline)//Nếu kiểu chơi người đánh online
-            //{
-
-            //}
-            //#endregion
             #region Người online
             else if (Option.WhoPlayWith == Player.HumanOnline)
             {//Player.Com sẽ là người ở phương xa
                 Point toado = e.GetPosition(canvasBanCo);
-
                 int cl = ((int)toado.X / length);
                 int rw = ((int)toado.Y / length);
                 if (board[rw, cl] == Player.None)//Nếu ô bấm chưa có cờ
