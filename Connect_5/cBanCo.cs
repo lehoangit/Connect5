@@ -37,13 +37,12 @@ namespace Connect_5
     class cBanCo
     {
         // position of server sent for client
-        public static int rows = -1, columns = -1;
+        public static Node Position;
+
         public static Socket socket;
 
-        // 5 won position of server sent for client
-        public static cCells p1, p2, p3, p4, p5;
 
-        private DispatcherTimer timer; // timer variable 
+        public static DispatcherTimer timer; // timer variable 
 
         // main variables
         private int row = Settings.Default._rows;
@@ -55,13 +54,10 @@ namespace Connect_5
         private MainWindow frmParent; //Form thực hiện
         private Canvas canvasBanCo; // Nơi vẽ bàn cờ
         private cLuongGiaBanCo eBoard; //Bảng lượng giá bàn cờ
-        private c5OWin OWin; // Kiểm tra 5 ô win
+        public static c5OWin OWin; // Kiểm tra 5 ô win
 
         public cOption Option; // Tùy chọn trò chơi
                                //Các biến phụ
-
-        private Image chess1; // cờ ảo cho người chơi thứ 1
-        private Image chess2; // cờ ảo cho người chơi thứ 2
 
         // Điểm lượng giá
         public int[] PhongThu = new int[5] { 0, 1, 9, 85, 769 };
@@ -107,7 +103,7 @@ namespace Connect_5
 
             timer = new DispatcherTimer();
             timer.Tick += new EventHandler(timer_Tick);
-            timer.Interval = new TimeSpan(1);
+            timer.Interval = new TimeSpan(50);
             timer.Start();
             //// đa tiến trình
             //progress = "0";
@@ -118,25 +114,46 @@ namespace Connect_5
             //bw.DoWork += new DoWorkEventHandler(bw_DoWork);
             //bw.ProgressChanged += new ProgressChangedEventHandler(bw_ProgressChanged);
             //bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
+            Position.Row = -1; Position.Column = -1;
         }
+
 
         private void timer_Tick(object sender, EventArgs e)
         {
-            if (end == Player.None)// check in not yet end game
+            if (Option.WhoPlayWith == Player.HumanOnline)
             {
-                if (rows != -1 && columns != -1)
+                if (Position.Row != -1 && Position.Column != -1)
                 {
-                    board[rows, columns] = currPlayer;//Lưu loại cờ vừa đánh vào mảng
-                    veQuanCo(rows, columns); // Draw chess
-                    currPlayer = Player.None; // destroy current turn
-                    rows = -1; columns = -1; // stop exeption drawing chess 
+                    board[Position.Row, Position.Column] = currPlayer;// get value current
+                    veQuanCo(Position.Row, Position.Column); // drawing chess on current board
+
+                    Position.Row = -1; Position.Column = -1; // set default value
                 }
             }
-            else if (end == Player.Human) // check in client won the game
+            if (Option.WhoPlayWith == Player.ComputerOnline)
             {
+                #region Máy đánh online
+                Node node = new Node();
+                if (currPlayer == Player.Human) // xét Human đại diện cho máy
+                {//Tìm đường đi cho máy
+                    eBoard.ResetBoard();
+                    //Lượng giá bàn cờ cho máy
+                    LuongGia(currPlayer);
+                    node = eBoard.GetMaxNode();//lưu vị trí máy sẽ đánh
+                    ConnectSocket.SendPosition(socket, node.Row, node.Column);
+                }
 
+                // liên tục kiểm tra và vẽ cờ
+                if (Position.Row != -1 && Position.Column != -1)
+                {
+                    board[Position.Row, Position.Column] = currPlayer;// get value current
+                    veQuanCo(Position.Row, Position.Column); // drawing chess on current board
+
+                    Position.Row = -1; Position.Column = -1; // set default value
+                }
+
+                #endregion
             }
-
         }
 
         // highlight position when someone won the game
@@ -147,61 +164,15 @@ namespace Connect_5
                 int rw = OWin.GiaTri[i].Row;
                 int cl = OWin.GiaTri[i].Column;
                 Image highlight = new Image();
-                highlight.Source = new BitmapImage(new Uri("pack://application:,,,/Images/tick2.png"));
-                highlight.Width = highlight.Height = length - 10;
+                highlight.Source = new BitmapImage(new Uri("pack://application:,,,/Images/tick4.png"));
+                highlight.Width = highlight.Height = length;
                 highlight.HorizontalAlignment = 0;
                 highlight.VerticalAlignment = 0;
-                highlight.Margin = new Thickness(cl * length + 3, rw * length + 3, 0, 0);
+                highlight.Margin = new Thickness(cl * length, rw * length, 0, 0);
                 highlight.Opacity = 100;
                 canvasBanCo.Children.Add(highlight);
             }
         }
-        
-
-
-        //Player pp = Player.Com;
-        //private void bw_DoWork(object sender, DoWorkEventArgs e)
-        //{
-        //    LuongGia(pp);
-        //}
-        //private void startProgress(Player cc)
-        //{
-        //    if (bw.IsBusy != true)
-        //    {
-        //        pp = cc;
-        //        bw.RunWorkerAsync();
-        //    }
-        //}
-        //private void cancelProgress()
-        //{
-        //    if (bw.WorkerSupportsCancellation == true)
-        //    {
-        //        bw.CancelAsync();
-        //    }
-        //}
-
-
-        //private void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        //{
-        //    if ((e.Cancelled == true))
-        //    {
-        //        progress = "Canceled!";
-        //    }
-
-        //    else if (!(e.Error == null))
-        //    {
-        //        progress = ("Error: " + e.Error.Message);
-        //    }
-
-        //    else
-        //    {
-        //        progress = "Done!";
-        //    }
-        //}
-        //private void bw_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        //{
-        //    progress = (e.ProgressPercentage.ToString() + "%");
-        //}
 
         ///////////////////////////////////////////////////////////////////////////////////
 
@@ -300,7 +271,8 @@ namespace Connect_5
                         end = CheckEnd(rw, cl);//Kiểm tra xem trận đấu kết thúc chưa
                         if (end == Player.Human)//Nếu người chơi 1 thắng
                         {
-                            MessageBox.Show("Người chơi O Chiến thắng!");
+                            Highlight();
+                            MessageBox.Show("Người chơi X Chiến thắng!");
                             canvasBanCo.IsEnabled = false;
                         }
                         else
@@ -315,7 +287,8 @@ namespace Connect_5
                         end = CheckEnd(rw, cl);//Kiểm tra xem trận đấu kết thúc chưa
                         if (end == Player.Com)//Nếu người chơi 2 thắng
                         {
-                            MessageBox.Show("Người chơi X Chiến thắng!");
+                            Highlight();
+                            MessageBox.Show("Người chơi O Chiến thắng!");
                             canvasBanCo.IsEnabled = false;
                         }
                         else
@@ -336,6 +309,7 @@ namespace Connect_5
                     ConnectSocket.SendPosition(socket, rw, cl);
             }
             #endregion
+
         }
 
         //delegate cLuongGiaBanCo(Player player);

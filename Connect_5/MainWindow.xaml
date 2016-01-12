@@ -36,7 +36,7 @@
             <RadioButton x:Name="radComputerOnline" Content="Computer Online" HorizontalAlignment="Left" Margin="44,274,0,0" VerticalAlignment="Top" FontFamily="Times New Roman" FontSize="16"/>
             <TextBox x:Name="txtNickname" HorizontalAlignment="Left" Height="22" Margin="44,181,0,0" TextWrapping="Wrap" Text="Bỏ đồ án" VerticalAlignment="Top" Width="202" FontFamily="Times New Roman" FontSize="16"/>
             <Label x:Name="lblProgress" Content="0 %" Margin="185,149,37,369" SourceUpdated="lblProgress_SourceUpdated"/>
-            <local:Messager x:Name="mgChat" Grid.Column="2" HorizontalAlignment="Left" Margin="10,80,0,0" VerticalAlignment="Top" Height="460" Width="283" RenderTransformOrigin="0.511,0.661"/>
+            <local:Messager x:Name="mgChat" Grid.Column="2" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="469" Width="283" RenderTransformOrigin="0.511,0.661"/>
         </Grid>
     </DockPanel>
 </Window>

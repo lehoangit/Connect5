@@ -83,20 +83,31 @@ namespace Connect_5
 
                 // xử lý kết nối
                 
+
                 socket = IO.Socket(Settings.Default._connectString);
                 mgChat.socket = socket;
                 cBanCo.socket = socket;
 
                 ConnectSocket.Connect(socket,NicknameA, mgChat);
-
                 
             }
 
 
             if (radComputerOnline.IsChecked == true) // máy chơi online
             {
-                mgChat.IsEnabled = true;
                 banco.Option.WhoPlayWith = Player.ComputerOnline;
+                mgChat.NicknameA = NicknameA;
+                mgChat.NicknameB = NicknameB;
+                mgChat.IsEnabled = true;
+
+                // xử lý kết nối
+
+
+                socket = IO.Socket(Settings.Default._connectString);
+                mgChat.socket = socket;
+                cBanCo.socket = socket;
+
+                ConnectSocket.Connect(socket, NicknameA, mgChat);
             }
             canvasBoard.IsEnabled = true;
         }
